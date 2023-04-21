@@ -1,0 +1,120 @@
+/* 1. Quelles sont les commandes du fournisseur n°9120 ? */
+SELECT fournis.numfou,nomfou,numcom
+FROM entcom
+JOIN fournis ON entcom.numfou=fournis.numfou
+WHERE fournis.numfou= 9120 ;
+
+/* 2.Afficher le code des fournisseurs pour lesquels des commandes ont été passées. */
+SELECT fournis.numfou
+FROM fournis
+JOIN entcom ON fournis.numfou=entcom.numfou
+GROUP BY nomfou ;
+
+/* 3.Afficher le nombre de commandes fournisseurs passées, et le nombre de fournisseur concernés. */
+SELECT COUNT(numcom),COUNT(distinct fournis.numfou)
+FROM fournis
+JOIN entcom ON fournis.numfou=entcom.numfou;
+
+/* 4.Extraire les produits ayant un stock inférieur ou égal au stock d'alerte, et dont la quantité annuelle est inférieure à 1000.  */
+SELECT produit.qteann,produit.stkale,produit.codart,produit.libart,produit.stkphy
+FROM produit
+WHERE stkphy<=stkale AND qteann<1000;
+
+/* 5.Quels sont les fournisseurs situés dans les départements 75, 78, 92, 77 ?  */
+SELECT nomfou,posfou
+FROM fournis
+WHERE posfou LIKE '75___'OR posfou LIKE '78___' OR posfou LIKE '92___'OR posfou LIKE'77___' 
+ORDER BY posfou DESC, nomfou ;
+
+/* 6.Quelles sont les commandes passées en mars et en avril ? */
+SELECT datcom,numcom,MONTH(datcom)
+FROM entcom
+where MONTH(datcom)=3 OR MONTH(datcom)=4;
+
+/* 7.Quelles sont les commandes du jour qui ont des observations particulières */
+SELECT obscom,numcom,datcom
+FROM entcom 
+where obscom !='' AND obscom IS NOT NULL ;
+ 
+/* 8.Lister le total de chaque commande par total décroissant.*/
+SELECT SUM(qtecde*priuni) AS total,numcom 
+FROM ligcom 
+GROUP BY numcom
+ORDER BY total DESC;
+
+/* 9.Lister les commandes dont le total est supérieur à 10000€ ;
+ on exclura dans le calcul du total les articles commandés en 
+ quantité supérieure ou égale à 1000.  */
+SELECT SUM(qtecde*priuni) AS total,numcom 
+FROM ligcom 
+GROUP BY numcom
+ORDER BY total DESC;
+
+/* 10. Lister les commandes par nom de fournisseur.*/
+SELECT nomfou,numcom,datcom
+FROM fournis 
+JOIN entcom ON fournis.numfou=entcom.numfou
+ORDER BY nomfou asc ;
+
+/* 11.Sortir les produits des commandes ayant le mot "urgent' en observation.  */
+SELECT numcom,obscom
+FROM entcom
+WHERE obscom LIKE'%urgente%';
+
+/* 12.Coder de 2 manières différentes la requête suivante : Lister le nom des fournisseurs susceptibles de livrer au moins un 
+article. */
+
+/* MANIERE 1 */
+SELECT distinct entcom.numfou
+FROM fournis 
+JOIN entcom ON fournis.numfou=entcom.numfou
+JOIN ligcom ON entcom.numcom=ligcom.numcom;
+
+/* Maniere 2 */
+SELECT DISTINCT entcom.numfou
+FROM fournis,entcom,ligcom
+WHERE fournis.numfou=entcom.numfou AND entcom.numcom=ligcom.numcom ;
+
+/* 13.Coder de 2 manières différentes la requête suivante : 
+Lister les commandes dont le fournisseur est celui de la commande n°70210.  */
+
+
+/* MANIERE 1 */
+SELECT numcom,fournis.numfou,nomfou
+FROM entcom 
+JOIN fournis on fournis.numfou=entcom.numfou
+WHERE fournis.numfou=120 ;
+
+/* Maniere 2 */
+SELECT numcom,fournis.numfou,nomfou
+from entcom,fournis
+WHERE entcom.numfou=fournis.numfou AND fournis.numfou=120<;
+
+/* 14.Dans les articles susceptibles d’être vendus, lister les articles moins chers (basés sur Prix1) que le moins cher des rubans 
+(article dont le premier caractère commence par R). */
+/* 
+
+
+
+15.Sortir la liste des fournisseurs susceptibles de livrer les produits dont le stock est
+ inférieur ou égal à 150 % du stock d'alerte.  */
+ SELECT  nomfou,libart
+FROM fournis
+JOIN entcom ON fournis.numfou=entcom.numfou
+JOIN ligcom on entcom.numcom=ligcom.numcom
+JOIN produit ON produit.codart=ligcom.codart
+WHERE stkphy <=1.5*stkale 
+ORDER BY libart AND nomfou ;
+
+16.
+SELECT nomfou,libart,delliv,stkphy,stkale
+FROM fournis 
+JOIN vente ON fournis.numfou=vente.numfou
+JOIN produit ON produit.codart=vente.codart 
+JOIN ligcom ON produit.codart=ligcom.codart
+JOIN entcom ON entcom.numcom=ligcom.numcom
+WHERE stkphy <=1.5*stkale AND delliv<=30 
+ORDER BY  delliv;
+
+
+/* 17.Avec le même type de sélection que ci-dessus, sortir un total des stocks par fournisseur, triés par total décroissant. */
